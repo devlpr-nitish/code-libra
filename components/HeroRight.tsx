@@ -41,7 +41,7 @@ const StatBar = ({ label, val, max, color }: { label: string; val: number; max: 
 
 const ProfileCard = ({ user, isRight = false }: { user: typeof userA; isRight?: boolean }) => {
     return (
-        //Rahul 
+        //Rahul Bisht
         <motion.div
             initial={{ opacity: 0, x: isRight ? 50 : -50 }}
             animate={{ opacity: 1, x: 0 }}
