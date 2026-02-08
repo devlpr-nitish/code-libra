@@ -1,7 +1,6 @@
-
-'use client';
-
 import { DetailedUserProfile } from '@/lib/mock-data';
+import { ColorTheme, HEATMAP_THEMES } from '@/components/profile/ProfileHeatmap';
+import { useMemo } from 'react';
 import {
     LineChart,
     Line,
@@ -16,18 +15,29 @@ import { Card } from '@/components/ui/card';
 
 interface ContestGraphProps {
     userA: DetailedUserProfile;
-    userB: DetailedUserProfile;
+    userB?: DetailedUserProfile; // Optional for single-user mode
+    singleUser?: boolean;
+    colorTheme?: ColorTheme;
 }
 
-export default function ContestGraph({ userA, userB }: ContestGraphProps) {
+export default function ContestGraph({ userA, userB, singleUser = false, colorTheme }: ContestGraphProps) {
+    // Get theme color hex
+    const themeColor = useMemo(() => {
+        if (!colorTheme) return "#3b82f6"; // Default blue
+        const theme = HEATMAP_THEMES.find(t => t.name === colorTheme);
+        return theme ? theme.hex : "#3b82f6";
+    }, [colorTheme]);
+
     // Merge histories into a unified timeline
     // 1. Collect all unique dates/timestamps
     const allDates = new Set<string>();
     const historyA = new Map(userA.contestHistory.map(h => [h.date, h]));
-    const historyB = new Map(userB.contestHistory.map(h => [h.date, h]));
+    const historyB = userB ? new Map(userB.contestHistory.map(h => [h.date, h])) : new Map();
 
     userA.contestHistory.forEach(h => allDates.add(h.date));
-    userB.contestHistory.forEach(h => allDates.add(h.date));
+    if (userB) {
+        userB.contestHistory.forEach(h => allDates.add(h.date));
+    }
 
     // 2. Sort dates chronologically
     const sortedDates = Array.from(allDates).sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
@@ -86,31 +96,35 @@ export default function ContestGraph({ userA, userB }: ContestGraphProps) {
                             type="monotone"
                             dataKey="ratingA"
                             name={userA.username}
-                            stroke="#06b6d4"
+                            stroke={themeColor} // Use theme color
                             strokeWidth={2}
                             dot={false}
                             activeDot={{ r: 4 }}
                             connectNulls
                         />
-                        <Line
-                            type="monotone"
-                            dataKey="ratingB"
-                            name={userB.username}
-                            stroke="#ef4444"
-                            strokeWidth={2}
-                            dot={false}
-                            activeDot={{ r: 4 }}
-                            connectNulls
-                        />
+                        {!singleUser && userB && (
+                            <Line
+                                type="monotone"
+                                dataKey="ratingB"
+                                name={userB.username}
+                                stroke="#ef4444"
+                                strokeWidth={2}
+                                dot={false}
+                                activeDot={{ r: 4 }}
+                                connectNulls
+                            />
+                        )}
                     </LineChart>
                 </ResponsiveContainer>
             </div>
 
-            <div className="mt-4 pt-4 border-t border-border">
-                <p className="text-sm text-muted-foreground text-center font-light">
-                    <span className="font-medium text-foreground">{userA.username}</span> shows steadier growth, while <span className="font-medium text-foreground">{userB.username}</span> has higher volatility.
-                </p>
-            </div>
+            {!singleUser && userB && (
+                <div className="mt-4 pt-4 border-t border-border">
+                    <p className="text-sm text-muted-foreground text-center font-light">
+                        <span className="font-medium text-foreground">{userA.username}</span> shows steadier growth, while <span className="font-medium text-foreground">{userB.username}</span> has higher volatility.
+                    </p>
+                </div>
+            )}
         </div>
     );
 }

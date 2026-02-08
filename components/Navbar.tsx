@@ -2,6 +2,7 @@
 
 import * as React from 'react'
 import { cn } from '@/lib/utils'
+import { getUserFromCookie } from '@/lib/cookie-utils'
 import { buttonVariants, Button } from '@/components/ui/button'
 import {
     NavigationMenu,
@@ -24,14 +25,15 @@ import { WeightTilde, CircleUser } from 'lucide-react';
 
 import { useTheme } from 'next-themes'
 import { useRouter, usePathname } from 'next/navigation'
+import { useEffect } from 'react'
 
 /* ------------------ Sample nav (replace with real links) ------------------ */
 const navigationLinks = [
     {
         name: 'Menu',
         items: [
-            { href: '/compare-profile', label: 'compare profile' },
-            { href: '/contest-questions', label: 'contest questions' },
+            { href: '/compare-profile', label: 'Compare Profile' },
+            { href: '/contest-questions', label: 'Contest Questions' },
             { href: '/weekly-goals', label: 'Weekly Goals' },
         ],
     },
@@ -47,7 +49,7 @@ export function Search({ className }: React.ComponentProps<'button'>) {
         router.push(href)
     }
 
-    React.useEffect(() => {
+    useEffect(() => {
         const down = (e: KeyboardEvent) => {
             if (e.key === 'k' && (e.metaKey || e.ctrlKey)) {
                 e.preventDefault()
@@ -142,6 +144,13 @@ export function ModeSwitcher() {
 
 export default function Navbar() {
     const pathname = usePathname();
+    const [currentUser, setCurrentUser] = React.useState<{ username: string } | null>(null);
+
+    // Read user from cookie on mount
+    useEffect(() => {
+        const user = getUserFromCookie();
+        setCurrentUser(user);
+    }, []);
 
     return (
         <header className="container mx-auto flex h-14 items-center justify-between gap-4 px-4">
@@ -190,14 +199,24 @@ export default function Navbar() {
 
                 <Separator orientation="vertical" className="hidden md:flex data-[orientation=vertical]:h-5" />
 
-                {/* User profile or login button */}
-                <Link
-                    href="#"
-                    className={cn(buttonVariants({ variant: 'ghost', size: 'sm' }), 'h-8 w-8 flex items-center justify-center')}
-                    aria-label="Profile"
-                >
-                    <CircleUser className="h-5 w-5" />
-                </Link>
+                {/* User profile or login button - dynamic based on auth status */}
+                {currentUser ? (
+                    <Link
+                        href={`/user/${currentUser.username}`}
+                        className={cn(buttonVariants({ variant: 'ghost', size: 'sm' }), 'h-8 w-8 flex items-center justify-center')}
+                        aria-label="Profile"
+                    >
+                        <CircleUser className="h-8 w-8" />
+                    </Link>
+                ) : (
+                    <Link
+                        href="/login"
+                        className={cn(buttonVariants({ variant: 'ghost', size: 'sm' }), 'h-8 px-3 flex items-center justify-center')}
+                        aria-label="Login"
+                    >
+                        <span className="text-sm font-medium">Login</span>
+                    </Link>
+                )}
 
                 <Separator orientation="vertical" className="hidden md:flex data-[orientation=vertical]:h-5" />
 
