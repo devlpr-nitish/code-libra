@@ -26,6 +26,18 @@ interface ProfilePageProps {
     }>;
 }
 
+// Helper function to format large numbers with abbreviated suffixes
+const formatLargeNumber = (num: number): string => {
+    if (num >= 100000) {
+        // Use Lakhs (L) for numbers >= 1 lakh
+        return `${(num / 100000).toFixed(1)}L`;
+    } else if (num >= 1000) {
+        // Use Thousands (K) for numbers >= 1 thousand
+        return `${(num / 1000).toFixed(1)}K`;
+    }
+    return num.toString();
+};
+
 // Helper function to create a default empty user profile
 const createDefaultProfile = (username: string): DetailedUserProfile => ({
     username,
@@ -185,7 +197,7 @@ export default function ProfilePage({ params }: ProfilePageProps) {
                             />
                             <SummaryCard
                                 title="Rank"
-                                value={`#${user.ranking.toLocaleString()}`}
+                                value={`#${formatLargeNumber(user.ranking)}`}
                                 icon={TrendingUp}
                                 iconColor="text-blue-500"
                                 className='border-r-1'
@@ -229,7 +241,7 @@ export default function ProfilePage({ params }: ProfilePageProps) {
                                                             'text-red-500'
                                                         }`}
                                                 >
-                                                    {dailyQuestion.questionFrontendId}
+                                                    {"Q." + dailyQuestion.questionFrontendId}
                                                 </a>
                                                 <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-popover text-popover-foreground text-xs rounded shadow-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50 border border-border">
                                                     {dailyQuestion.questionTitle}

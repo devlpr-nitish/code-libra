@@ -42,7 +42,7 @@ export function getUserFromCookie(): AuthUser | null {
     // TODO: Implement actual cookie reading logic
     // For now, return a mock logged-in user for development
     return {
-        username: 'devlprnitish'
+        username: 'rrrautela'
     };
 
     /* Original implementation - uncomment when ready to use cookies

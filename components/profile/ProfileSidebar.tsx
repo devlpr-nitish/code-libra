@@ -62,7 +62,7 @@ export default function ProfileSidebar({ user, score }: ProfileSidebarProps) {
                 {/* Name & Username */}
                 <div className="flex flex-col pt-1 space-y-1">
                     <div className="flex items-center gap-2">
-                        <h1 className="text-xl font-bold text-foreground">{user.name}</h1>
+                        <h1 className="text-xl font-bold text-foreground">{user.name.length > 10 ? user.name.slice(0, 8) + "..." : user.name}</h1>
                         {/* Active Badge */}
                         {activeBadge?.icon && (
                             <div className="relative w-5 h-5 md:w-6 md:h-6" title={activeBadge.displayName}>
