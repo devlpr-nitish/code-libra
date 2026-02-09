@@ -1,7 +1,9 @@
 'use client'
 
 import * as React from 'react'
+import Image from 'next/image'
 import { cn } from '@/lib/utils'
+import { AuthUser } from '@/lib/cookie-utils'
 import { getUserFromCookie } from '@/lib/cookie-utils'
 import { buttonVariants, Button } from '@/components/ui/button'
 import {
@@ -26,6 +28,7 @@ import { WeightTilde, CircleUser } from 'lucide-react';
 import { useTheme } from 'next-themes'
 import { useRouter, usePathname } from 'next/navigation'
 import { useEffect } from 'react'
+import { getUserProfile } from '@/actions/get-user-profile'
 
 /* ------------------ Sample nav (replace with real links) ------------------ */
 const navigationLinks = [
@@ -144,12 +147,29 @@ export function ModeSwitcher() {
 
 export default function Navbar() {
     const pathname = usePathname();
-    const [currentUser, setCurrentUser] = React.useState<{ username: string } | null>(null);
+    const [currentUser, setCurrentUser] = React.useState<AuthUser | null>(null);
 
-    // Read user from cookie on mount
+    // Read user from cookie on mount and fetch full profile
     useEffect(() => {
         const user = getUserFromCookie();
-        setCurrentUser(user);
+
+        if (user) {
+            // Fetch full profile to get avatar
+            getUserProfile(user.username)
+                .then(data => {
+                    setCurrentUser({
+                        username: user.username,
+                        avatar: data.avatar || user.avatar,
+                        name: data.name || user.name
+                    });
+                })
+                .catch(() => {
+                    // If fetch fails, just use the cookie data
+                    setCurrentUser(user);
+                });
+        } else {
+            setCurrentUser(null);
+        }
     }, []);
 
     return (
@@ -203,10 +223,21 @@ export default function Navbar() {
                 {currentUser ? (
                     <Link
                         href={`/user/${currentUser.username}`}
-                        className={cn(buttonVariants({ variant: 'ghost', size: 'sm' }), 'h-8 w-8 flex items-center justify-center')}
+                        className={cn(buttonVariants({ variant: 'ghost', size: 'sm' }), 'h-8 w-8 flex items-center justify-center p-0 overflow-hidden rounded-full')}
                         aria-label="Profile"
                     >
-                        <CircleUser className="h-8 w-8" />
+                        {currentUser.avatar ? (
+                            <Image
+                                src={currentUser.avatar}
+                                alt={currentUser.name || currentUser.username}
+                                width={28}
+                                height={28}
+                                className="rounded-full border-1 border-gray-200 dark:border-gray-800 object-cover"
+                                unoptimized
+                            />
+                        ) : (
+                            <CircleUser className="h-8 w-8" />
+                        )}
                     </Link>
                 ) : (
                     <Link
