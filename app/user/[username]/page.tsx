@@ -177,7 +177,7 @@ export default function ProfilePage({ params }: ProfilePageProps) {
         <div className="min-h-screen bg-background text-foreground px-6">
             <div className="max-w-7xl mx-auto px-4 py-2">
                 {/* Two-column Layout - Adjusted for compact design */}
-                <div className="grid grid-cols-1 lg:grid-cols-[25%_75%] gap-4">
+                <div className="grid grid-cols-1 lg:grid-cols-[25%_75%] gap-1">
                     {/* Left Sidebar - Sticky & Compact */}
                     <div className="lg:sticky lg:top-4 lg:self-start border-1 p-2">
                         <ProfileSidebar user={user} score={userScore?.totalScore} />
