@@ -182,11 +182,11 @@ export default function Navbar() {
                     href="/"
                     className={cn(
                         buttonVariants({ variant: 'ghost', size: 'icon' }),
-                        'dark:hover:bg-accent text-accent-foreground h-8 w-8 flex items-center justify-center'
+                        'h-8 w-8 flex items-center justify-center hover:bg-transparent'
                     )}
                     aria-label="Home"
                 >
-                    <WeightTilde className="h-6 w-6" />
+                    <WeightTilde className="h-6 w-6 text-orange-500 dark:text-orange-400" />
                 </Link>
 
                 <Search className="mr-2 hidden md:flex" />

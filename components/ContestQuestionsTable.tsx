@@ -6,7 +6,13 @@ import { ContestQuestion } from '@/actions/get-contest-questions';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Search, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Filter, X } from 'lucide-react';
+import { Search, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Filter, X, Shuffle } from 'lucide-react';
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from "@/components/ui/tooltip"
 
 interface ContestQuestionsTableProps {
     questions: ContestQuestion[];
@@ -24,7 +30,6 @@ export default function ContestQuestionsTable({ questions }: ContestQuestionsTab
     const [sortField, setSortField] = useState<SortField>('rating');
     const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
     const [currentPage, setCurrentPage] = useState(1);
-    const [isAnimating, setIsAnimating] = useState(false);
 
     // Filters
     const [selectedProblemIndices, setSelectedProblemIndices] = useState<string[]>([]);
@@ -170,6 +175,19 @@ export default function ContestQuestionsTable({ questions }: ContestQuestionsTab
 
     const hasActiveFilters = selectedProblemIndices.length > 0 || minRating || maxRating || searchQuery;
 
+    const handleRandomQuestion = () => {
+        if (filteredAndSortedQuestions.length === 0) return;
+        const randomIndex = Math.floor(Math.random() * filteredAndSortedQuestions.length);
+        const randomQuestion = filteredAndSortedQuestions[randomIndex];
+        // Construct the URL matching the logic in the table
+        const urlSlug = randomQuestion.title
+            .toLowerCase()
+            .replace(/\s+/g, '-')
+            .replace(/[^a-z0-9-]/g, '');
+        const url = `https://leetcode.com/problems/${urlSlug}/`;
+        window.open(url, '_blank');
+    };
+
     return (
         <div className="space-y-4">
             {/* Compact Single-Row Filter Layout */}
@@ -269,6 +287,26 @@ export default function ContestQuestionsTable({ questions }: ContestQuestionsTab
                     />
                 </div>
 
+                {/* Random Question Button */}
+                <TooltipProvider>
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={handleRandomQuestion}
+                                className="h-9 cursor-pointer"
+                                disabled={filteredAndSortedQuestions.length === 0}
+                            >
+                                <Shuffle className="h-4 w-4" />
+                            </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                            <p>Random Question</p>
+                        </TooltipContent>
+                    </Tooltip>
+                </TooltipProvider>
+
                 {/* Clear Filters Button */}
                 {hasActiveFilters && (
                     <Button
@@ -295,7 +333,7 @@ export default function ContestQuestionsTable({ questions }: ContestQuestionsTab
             </div>
 
             {/* Table with Shutter Animation */}
-            <div className="rounded-lg border border-border overflow-hidden">
+            <div className="border border-border overflow-hidden">
                 <div className="overflow-x-auto">
                     <table className="w-full">
                         <thead className="bg-secondary/50 border-b border-border">

@@ -155,7 +155,7 @@ function CompareProfileContent() {
             if (slot === 'A') setSkillsA(skills);
             else setSkillsB(skills);
 
-            toast.success(`Fetched profile for ${profileData.username}`);
+            // toast.success(`Fetched profile for ${profileData.username}`);
         } catch (error: any) {
             console.error(error);
             if (error.message.includes("Too Many Requests")) {

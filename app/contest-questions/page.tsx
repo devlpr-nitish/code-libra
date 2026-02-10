@@ -24,7 +24,7 @@ async function ContestQuestionsContent() {
         <div className="space-y-6">
             <div>
                 {/* <h1 className="text-3xl font-bold tracking-tight">Contest Questions</h1> */}
-                <p className="mt-2 font-bold">
+                <p className="mt-2 font-medium">
                     Browse LeetCode contest questions with difficulty ratings
                 </p>
             </div>
@@ -36,7 +36,7 @@ async function ContestQuestionsContent() {
 export default function ContestQuestionsPage() {
     return (
         <div className="min-h-screen bg-background text-foreground">
-            <div className="container mx-auto px-4 py-8 max-w-7xl">
+            <div className="container mx-auto px-4 max-w-7xl">
                 <Suspense fallback={<TableSkeleton />}>
                     <ContestQuestionsContent />
                 </Suspense>
