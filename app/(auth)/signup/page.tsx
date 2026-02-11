@@ -42,11 +42,11 @@ export default function SignUpPage() {
         setMounted(true);
     }, []);
 
-    // Auto-change images every 10 seconds
+    // Auto-change images every 4 seconds
     useEffect(() => {
         const interval = setInterval(() => {
             setCurrentImageIndex((prev) => (prev + 1) % featureShowcase.length);
-        }, 10000); // 10 seconds
+        }, 4000);
 
         return () => clearInterval(interval);
     }, []);
@@ -101,25 +101,27 @@ export default function SignUpPage() {
     }
 
     return (
-        <div className="min-h-screen bg-white dark:bg-black flex items-center justify-center p-4">
-            <div className="w-full max-w-7xl grid grid-cols-1 lg:grid-cols-[40%_60%] gap-8 lg:gap-12 items-center">
+        <div className="min-h-screen bg-cover bg-center flex flex-col lg:flex-row relative overflow-hidden" style={{ backgroundImage: "url('/auth_bg_orange.png')" }}>
+            {/* Overlay */}
+            <div className="absolute inset-0 bg-black/20 backdrop-blur-[2px] z-0 pointer-events-none"></div>
 
-                {/* LEFT SECTION - Sign Up Form */}
+            {/* LEFT SECTION - Sign Up Form */}
+            <div className="w-full lg:w-[40%] flex items-center justify-center p-8 relative z-10 h-full min-h-screen overflow-y-auto">
                 <motion.div
                     initial={{ opacity: 0, x: -50 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ duration: 0.6 }}
-                    className="w-full max-w-md mx-auto lg:mx-0"
+                    className="w-full max-w-md"
                 >
                     <div className="relative">
                         {/* Glassmorphic card */}
-                        <div className="relative backdrop-blur-xl bg-white/60 dark:bg-black/60 border-2 border-gray-200/50 dark:border-gray-800/50 rounded-3xl p-8 shadow-2xl">
+                        <div className="relative backdrop-blur-xl bg-orange-500/10 dark:bg-orange-950/30 border border-orange-200/20 dark:border-orange-700/20 rounded-3xl p-8 shadow-2xl">
                             {/* Logo/Brand */}
                             <div className="mb-8">
-                                <h1 className="text-3xl font-bold text-black dark:text-white mb-2">
-                                    Create your <span className="underline decoration-2">CodeLibra</span> account
+                                <h1 className="text-2xl font-bold text-white mb-2">
+                                    Join <span className="text-orange-500 dark:text-orange-400 decoration-2 decoration-orange-500/50">CodeLibra</span>
                                 </h1>
-                                <p className="text-gray-600 dark:text-gray-400 text-sm">
+                                <p className="text-gray-200 text-sm">
                                     Analyze, compare, and understand the real value of your coding profile.
                                 </p>
                             </div>
@@ -127,7 +129,7 @@ export default function SignUpPage() {
                             <form onSubmit={handleSubmit} className="space-y-5">
                                 {/* Username Field */}
                                 <div>
-                                    <label htmlFor="username" className="block text-sm font-medium text-black dark:text-white mb-2">
+                                    <label htmlFor="username" className="block text-sm font-medium text-white mb-2">
                                         LeetCode Username
                                     </label>
                                     <div className="relative">
@@ -136,20 +138,20 @@ export default function SignUpPage() {
                                             type="text"
                                             value={username}
                                             onChange={(e) => setUsername(e.target.value)}
-                                            placeholder="leetcode_username"
-                                            className="w-full bg-white/50 dark:bg-black/50 backdrop-blur-sm border-2 border-gray-300 dark:border-gray-700 rounded-lg px-4 py-3 text-black dark:text-white placeholder:text-gray-400 focus:outline-none focus:border-black dark:focus:border-white transition-all"
+                                            placeholder="Leetcode username"
+                                            className="w-full bg-white/10 dark:bg-black/20 backdrop-blur-md border border-white/20 dark:border-white/10 rounded-lg px-4 py-3 text-white placeholder:text-white/50 focus:outline-none focus:border-orange-500/50 focus:bg-white/20 transition-all"
                                             required
                                         />
                                         {/* Validation icons */}
                                         <div className="absolute right-3 top-1/2 -translate-y-1/2">
                                             {isValidatingUsername && (
-                                                <Loader2 className="w-5 h-5 text-gray-500 animate-spin" />
+                                                <Loader2 className="w-5 h-5 text-gray-300 animate-spin" />
                                             )}
                                             {!isValidatingUsername && usernameValid === true && (
-                                                <Check className="w-5 h-5 text-black dark:text-white" />
+                                                <Check className="w-5 h-5 text-green-400" />
                                             )}
                                             {!isValidatingUsername && usernameValid === false && (
-                                                <X className="w-5 h-5 text-gray-400" />
+                                                <X className="w-5 h-5 text-red-400" />
                                             )}
                                         </div>
                                     </div>
@@ -158,10 +160,9 @@ export default function SignUpPage() {
                                         <motion.p
                                             initial={{ opacity: 0, y: -5 }}
                                             animate={{ opacity: 1, y: 0 }}
-                                            className={`text-xs mt-1.5 ${
-                                                isValidatingUsername ? 'text-gray-500' :
-                                                usernameValid ? 'text-black dark:text-white' : 'text-gray-400'
-                                            }`}
+                                            className={`text-xs mt-1.5 ${isValidatingUsername ? 'text-gray-300' :
+                                                usernameValid ? 'text-green-300' : 'text-red-300'
+                                                }`}
                                         >
                                             {isValidatingUsername ? 'Checking LeetCode username...' :
                                                 usernameValid ? '✓ Valid LeetCode username' : '✗ Must match a valid LeetCode username'}
@@ -171,7 +172,7 @@ export default function SignUpPage() {
 
                                 {/* Email Field */}
                                 <div>
-                                    <label htmlFor="email" className="block text-sm font-medium text-black dark:text-white mb-2">
+                                    <label htmlFor="email" className="block text-sm font-medium text-white mb-2">
                                         Email
                                     </label>
                                     <input
@@ -179,15 +180,15 @@ export default function SignUpPage() {
                                         type="email"
                                         value={email}
                                         onChange={(e) => setEmail(e.target.value)}
-                                        placeholder="you@example.com"
-                                        className="w-full bg-white/50 dark:bg-black/50 backdrop-blur-sm border-2 border-gray-300 dark:border-gray-700 rounded-lg px-4 py-3 text-black dark:text-white placeholder:text-gray-400 focus:outline-none focus:border-black dark:focus:border-white transition-all"
+                                        placeholder="email"
+                                        className="w-full bg-white/10 dark:bg-black/20 backdrop-blur-md border border-white/20 dark:border-white/10 rounded-lg px-4 py-3 text-white placeholder:text-white/50 focus:outline-none focus:border-white/50 focus:bg-white/20 transition-all"
                                         required
                                     />
                                 </div>
 
                                 {/* Password Field */}
                                 <div>
-                                    <label htmlFor="password" className="block text-sm font-medium text-black dark:text-white mb-2">
+                                    <label htmlFor="password" className="block text-sm font-medium text-white mb-2">
                                         Password
                                     </label>
                                     <div className="relative">
@@ -197,13 +198,13 @@ export default function SignUpPage() {
                                             value={password}
                                             onChange={(e) => setPassword(e.target.value)}
                                             placeholder="Minimum 8 characters"
-                                            className="w-full bg-white/50 dark:bg-black/50 backdrop-blur-sm border-2 border-gray-300 dark:border-gray-700 rounded-lg px-4 py-3 pr-12 text-black dark:text-white placeholder:text-gray-400 focus:outline-none focus:border-black dark:focus:border-white transition-all"
+                                            className="w-full bg-white/10 dark:bg-black/20 backdrop-blur-md border border-white/20 dark:border-white/10 rounded-lg px-4 py-3 pr-12 text-white placeholder:text-white/50 focus:outline-none focus:border-white/50 focus:bg-white/20 transition-all"
                                             required
                                         />
                                         <button
                                             type="button"
                                             onClick={() => setShowPassword(!showPassword)}
-                                            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-black dark:hover:text-white transition-colors"
+                                            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-300 hover:text-white transition-colors cursor-pointer"
                                         >
                                             {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                                         </button>
@@ -220,17 +221,16 @@ export default function SignUpPage() {
                                                 {[0, 1, 2, 3].map((i) => (
                                                     <div
                                                         key={i}
-                                                        className={`h-1 flex-1 rounded-full transition-all ${
-                                                            i < passwordStrength 
-                                                                ? 'bg-black dark:bg-white' 
-                                                                : 'bg-gray-300 dark:bg-gray-700'
-                                                        }`}
+                                                        className={`h-1 flex-1 rounded-full transition-all ${i < passwordStrength
+                                                            ? 'bg-white'
+                                                            : 'bg-white/20'
+                                                            }`}
                                                     />
                                                 ))}
                                             </div>
                                             {passwordStrength > 0 && (
-                                                <p className="text-xs text-gray-600 dark:text-gray-400">
-                                                    Password strength: <span className="text-black dark:text-white font-medium">
+                                                <p className="text-xs text-gray-300">
+                                                    Password strength: <span className="text-white font-medium">
                                                         {strengthLabels[passwordStrength]}
                                                     </span>
                                                 </p>
@@ -243,11 +243,10 @@ export default function SignUpPage() {
                                 <button
                                     type="submit"
                                     disabled={!isFormValid || isSubmitting}
-                                    className={`w-full py-3 px-4 rounded-lg font-semibold transition-all flex items-center justify-center gap-2 ${
-                                        isFormValid && !isSubmitting
-                                            ? 'bg-black dark:bg-white text-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-200 shadow-lg'
-                                            : 'bg-gray-300 dark:bg-gray-700 text-gray-500 cursor-not-allowed'
-                                    }`}
+                                    className={`w-full py-3 px-4 rounded-lg font-semibold transition-all flex items-center justify-center gap-2 ${isFormValid && !isSubmitting
+                                        ? 'bg-white text-black hover:bg-gray-100 shadow-lg hover:shadow-white/20'
+                                        : 'bg-white/10 text-gray-400 cursor-not-allowed border border-white/5'
+                                        }`}
                                 >
                                     {isSubmitting ? (
                                         <>
@@ -262,80 +261,89 @@ export default function SignUpPage() {
                                     )}
                                 </button>
 
-                                {/* Sign in link */}
-                                <p className="text-center text-sm text-gray-600 dark:text-gray-400">
+                                <p className="text-center text-sm text-gray-300">
                                     Already have an account?{' '}
-                                    <Link href="/signin" className="text-black dark:text-white font-semibold hover:underline transition-all">
-                                        Sign in
+                                    <Link href="/login" className="text-white font-semibold hover:underline transition-all decoration-white/50 hover:decoration-white">
+                                        Login
                                     </Link>
                                 </p>
                             </form>
                         </div>
                     </div>
                 </motion.div>
+            </div>
 
-                {/* RIGHT SECTION - Feature Showcase - Image Changes Every 10 Seconds */}
-                <div className="max-lg:hidden h-screen">
-                    <motion.div
-                        initial={{ opacity: 0, x: 50 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ duration: 0.6, delay: 0.2 }}
-                        className="relative h-full w-full overflow-hidden"
-                    >
-                        {/* Single image display with transitions */}
-                        <div className="relative h-full w-full">
-                            {featureShowcase.map((feature, idx) => (
-                                <motion.div
-                                    key={idx}
-                                    initial={{ opacity: 0 }}
-                                    animate={{ 
-                                        opacity: currentImageIndex === idx ? 1 : 0,
-                                        scale: currentImageIndex === idx ? 1 : 1.05
-                                    }}
-                                    transition={{ duration: 1, ease: "easeInOut" }}
-                                    className="absolute inset-0"
-                                    style={{ pointerEvents: currentImageIndex === idx ? 'auto' : 'none' }}
-                                >
-                                    <div className="relative h-full w-full overflow-hidden bg-white dark:bg-black">
-                                        <div className="relative w-full h-full grayscale">
-                                            <Image
-                                                src={feature.image}
-                                                alt={feature.caption}
-                                                fill
-                                                className="object-cover"
-                                                priority={idx === 0}
-                                            />
-                                        </div>
-                                        {/* Caption overlay */}
-                                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex items-end">
-                                            <div className="w-full p-6">
-                                                <p className="text-white font-semibold text-lg">
-                                                    {feature.caption}
-                                                </p>
+            {/* RIGHT SECTION - Feature Showcase - Image Changes Every 10 Seconds */}
+            <div className="max-lg:hidden lg:w-[60%] h-screen sticky top-0">
+                <motion.div
+                    initial={{ opacity: 0, x: 50 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.6, delay: 0.2 }}
+                    className="relative h-full w-full overflow-hidden"
+                >
+                    {/* Single image display with transitions */}
+                    <div className="relative h-full w-full">
+                        {featureShowcase.map((feature, idx) => (
+                            <motion.div
+                                key={idx}
+                                initial={{ opacity: 0 }}
+                                animate={{
+                                    opacity: currentImageIndex === idx ? 1 : 0,
+                                    scale: currentImageIndex === idx ? 1 : 1.05
+                                }}
+                                transition={{ duration: 1, ease: "easeInOut" }}
+                                className="absolute inset-0"
+                                style={{ pointerEvents: currentImageIndex === idx ? 'auto' : 'none' }}
+                            >
+                                <div className="relative h-full w-full overflow-hidden bg-black/40">
+                                    <div className="relative w-full h-full">
+                                        <Image
+                                            src={feature.image}
+                                            alt={feature.caption}
+                                            fill
+                                            className="object-cover opacity-90"
+                                            priority={idx === 0}
+                                        />
+                                    </div>
+                                    {/* Caption overlay */}
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent flex items-end">
+                                        <div className="w-full p-12 mb-8">
+                                            <p className="text-white font-bold text-3xl mb-4 text-shadow-lg tracking-tight">
+                                                {feature.caption}
+                                            </p>
+                                            {/* Loading Bar */}
+                                            <div className="h-1.5 w-24 bg-white/30 rounded-full overflow-hidden">
+                                                {currentImageIndex === idx && (
+                                                    <motion.div
+                                                        initial={{ width: 0 }}
+                                                        animate={{ width: "100%" }}
+                                                        transition={{ duration: 4, ease: "linear" }}
+                                                        className="h-full bg-white rounded-full"
+                                                    />
+                                                )}
                                             </div>
                                         </div>
                                     </div>
-                                </motion.div>
-                            ))}
-                        </div>
+                                </div>
+                            </motion.div>
+                        ))}
+                    </div>
 
-                        {/* Slide indicators */}
-                        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2 z-10">
-                            {featureShowcase.map((_, idx) => (
-                                <button
-                                    key={idx}
-                                    onClick={() => setCurrentImageIndex(idx)}
-                                    className={`transition-all ${
-                                        currentImageIndex === idx 
-                                            ? 'w-8 h-2 bg-white' 
-                                            : 'w-2 h-2 bg-white/60 hover:bg-white/80'
+                    {/* Slide indicators */}
+                    <div className="absolute bottom-12 right-12 flex gap-3 z-20">
+                        {featureShowcase.map((_, idx) => (
+                            <button
+                                key={idx}
+                                onClick={() => setCurrentImageIndex(idx)}
+                                className={`transition-all duration-300 ${currentImageIndex === idx
+                                    ? 'w-10 h-2 bg-white shadow-[0_0_15px_rgba(255,255,255,0.6)]'
+                                    : 'w-2 h-2 bg-white/40 hover:bg-white/60'
                                     } rounded-full backdrop-blur-sm`}
-                                    aria-label={`Go to slide ${idx + 1}`}
-                                />
-                            ))}
-                        </div>
-                    </motion.div>
-                </div>
+                                aria-label={`Go to slide ${idx + 1}`}
+                            />
+                        ))}
+                    </div>
+                </motion.div>
             </div>
         </div>
     );
