@@ -1,15 +1,26 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { motion } from 'framer-motion';
 import { Eye, EyeOff, Loader2, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import { useTheme } from 'next-themes';
 import Image from 'next/image';
 import { loginUser } from '@/actions/auth-user';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation'; // Keep import for UrlParamHandler but not needed here? No, I need it for the sub-component.
 import { toast } from 'sonner';
 import { setCookie, getUserFromCookie } from '@/lib/cookie-utils';
+
+function UrlParamHandler({ setIdentifier }: { setIdentifier: (value: string) => void }) {
+    const searchParams = useSearchParams();
+    useEffect(() => {
+        const usernameParam = searchParams.get('username');
+        if (usernameParam) {
+            setIdentifier(usernameParam);
+        }
+    }, [searchParams, setIdentifier]);
+    return null;
+}
 
 const featureShowcase = [
     {
@@ -32,7 +43,6 @@ const featureShowcase = [
 
 export default function LoginPage() {
     const router = useRouter();
-    const searchParams = useSearchParams();
     const [identifier, setIdentifier] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
@@ -47,13 +57,7 @@ export default function LoginPage() {
         if (user && user.username) {
             router.push(`/user/${user.username}`);
         }
-
-        // Check for username in query params
-        const usernameParam = searchParams.get('username');
-        if (usernameParam) {
-            setIdentifier(usernameParam);
-        }
-    }, [router, searchParams]);
+    }, [router]);
 
     // Auto-change images every 4 seconds
     useEffect(() => {
@@ -131,6 +135,9 @@ export default function LoginPage() {
                         {/* Glassmorphic card */}
                         <div className="relative backdrop-blur-xl bg-orange-500/10 dark:bg-orange-950/30 border border-orange-200/20 dark:border-orange-700/20 rounded-3xl p-8 shadow-2xl">
                             {/* Logo/Brand */}
+                            <Suspense fallback={null}>
+                                <UrlParamHandler setIdentifier={setIdentifier} />
+                            </Suspense>
                             <div className="mb-8">
                                 <h1 className="text-2xl font-bold text-white mb-2">
                                     Welcome back to <span className="text-orange-500 dark:text-orange-400 decoration-2 decoration-orange-500/50">CodeLibra</span>
