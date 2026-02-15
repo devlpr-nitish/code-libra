@@ -23,12 +23,22 @@ import {
     CommandGroup,
     CommandItem,
 } from '@/components/ui/command';
-import { WeightTilde, CircleUser } from 'lucide-react';
+import { WeightTilde, CircleUser, LogOut, User, Github } from 'lucide-react';
 
 import { useTheme } from 'next-themes'
 import { useRouter, usePathname } from 'next/navigation'
 import { useEffect } from 'react'
 import { getUserProfile } from '@/actions/get-user-profile'
+import { removeCookie } from '@/lib/cookie-utils'
+import { toast } from 'sonner'
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
 /* ------------------ Sample nav (replace with real links) ------------------ */
 const navigationLinks = [
@@ -147,6 +157,7 @@ export function ModeSwitcher() {
 
 export default function Navbar() {
     const pathname = usePathname();
+    const router = useRouter();
     const [currentUser, setCurrentUser] = React.useState<AuthUser | null>(null);
 
     // Read user from cookie on mount and fetch full profile
@@ -172,86 +183,126 @@ export default function Navbar() {
         }
     }, []);
 
+    const handleLogout = () => {
+        removeCookie('leetcode_user');
+        setCurrentUser(null);
+        toast.success('Logged out successfully');
+        router.push('/');
+        router.refresh();
+    };
+
     return (
-        <header className="container mx-auto flex h-14 items-center justify-between gap-4 px-4">
-            <div className="flex items-center justify-start gap-2 md:flex-1 md:gap-4">
-                <MobileNav nav={navigationLinks} />
+        <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+            <div className="max-w-7xl mx-auto flex h-14 items-center justify-between gap-4 px-4">
+                <div className="flex items-center justify-start gap-2 md:flex-1 md:gap-4">
+                    <MobileNav nav={navigationLinks} />
 
-                {/* Logo button */}
-                <Link
-                    href="/"
-                    className={cn(
-                        buttonVariants({ variant: 'ghost', size: 'icon' }),
-                        'h-8 w-8 flex items-center justify-center hover:bg-transparent'
-                    )}
-                    aria-label="Home"
-                >
-                    <WeightTilde className="h-6 w-6 text-orange-500 dark:text-orange-400" />
-                </Link>
-
-                <Search className="mr-2 hidden md:flex" />
-            </div>
-
-            <div className="flex items-center justify-end gap-2">
-                <NavigationMenu className="max-md:hidden">
-                    <NavigationMenuList className="flex items-center gap-1">
-                        {navigationLinks[0].items.map((link, index) => {
-                            const isActive = pathname === link.href || (pathname === '/' && link.href === '/compare-profile');
-                            return (
-                                <NavigationMenuItem key={index}>
-                                    <NavigationMenuLink asChild>
-                                        <Link
-                                            href={link.href}
-                                            data-active={isActive ? 'true' : undefined}
-                                            className={cn(
-                                                'rounded-md px-3 py-1.5 text-sm font-medium transition-colors',
-                                                isActive ? 'text-accent-foreground' : 'text-foreground/60 hover:text-foreground'
-                                            )}
-                                        >
-                                            {link.label}
-                                        </Link>
-                                    </NavigationMenuLink>
-                                </NavigationMenuItem>
-                            );
-                        })}
-                    </NavigationMenuList>
-                </NavigationMenu>
-
-                <Separator orientation="vertical" className="hidden md:flex data-[orientation=vertical]:h-5" />
-
-                {/* User profile or login button - dynamic based on auth status */}
-                {currentUser ? (
+                    {/* Logo button */}
                     <Link
-                        href={`/user/${currentUser.username}`}
-                        className={cn(buttonVariants({ variant: 'ghost', size: 'sm' }), 'h-8 w-8 flex items-center justify-center p-0 overflow-hidden rounded-full')}
-                        aria-label="Profile"
-                    >
-                        {currentUser.avatar ? (
-                            <Image
-                                src={currentUser.avatar}
-                                alt={currentUser.name || currentUser.username}
-                                width={28}
-                                height={28}
-                                className="rounded-full border-1 border-gray-200 dark:border-gray-800 object-cover"
-                                unoptimized
-                            />
-                        ) : (
-                            <CircleUser className="h-8 w-8" />
+                        href="/"
+                        className={cn(
+                            buttonVariants({ variant: 'ghost', size: 'icon' }),
+                            'h-8 w-8 flex items-center justify-center hover:bg-transparent'
                         )}
-                    </Link>
-                ) : (
-                    <Link
-                        href="/login"
-                        className={cn(buttonVariants({ variant: 'ghost', size: 'sm' }), 'h-8 px-3 flex items-center justify-center')}
-                        aria-label="Login"
+                        aria-label="Home"
                     >
-                        <span className="text-sm font-medium">Login</span>
+                        <WeightTilde className="h-6 w-6 text-orange-500 dark:text-orange-400" />
                     </Link>
-                )}
 
-                <Separator orientation="vertical" className="hidden md:flex data-[orientation=vertical]:h-5" />
+                    <Search className="mr-2 hidden md:flex" />
+                </div>
 
-                <ModeSwitcher />
+                <div className="flex items-center justify-end gap-2">
+                    <NavigationMenu className="max-md:hidden">
+                        <NavigationMenuList className="flex items-center gap-1">
+                            {navigationLinks[0].items.map((link, index) => {
+                                const isActive = pathname === link.href;
+                                return (
+                                    <NavigationMenuItem key={index}>
+                                        <NavigationMenuLink asChild>
+                                            <Link
+                                                href={link.href}
+                                                data-active={isActive ? 'true' : undefined}
+                                                className={cn(
+                                                    'rounded-md px-3 py-1.5 text-sm font-medium transition-colors',
+                                                    isActive ? 'text-accent-foreground' : 'text-foreground/60 hover:text-foreground'
+                                                )}
+                                            >
+                                                {link.label}
+                                            </Link>
+                                        </NavigationMenuLink>
+                                    </NavigationMenuItem>
+                                );
+                            })}
+                        </NavigationMenuList>
+                    </NavigationMenu>
+
+                    <Link
+                        href="https://github.com/devlpr-nitish/code-libra"
+                        target="_blank"
+                        rel="noreferrer"
+                        className={cn(buttonVariants({ variant: 'outline', size: 'sm' }), "hidden md:flex items-center gap-2")}
+                    >
+                        <Github className="h-4 w-4" />
+                        <span>Star on GitHub</span>
+                    </Link>
+
+                    <Separator orientation="vertical" className="hidden md:flex data-[orientation=vertical]:h-5" />
+
+                    {/* User profile or login button - dynamic based on auth status */}
+                    {currentUser ? (
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" className="relative h-8 w-8 rounded-full p-0">
+                                    {currentUser.avatar ? (
+                                        <Image
+                                            src={currentUser.avatar}
+                                            alt={currentUser.name || currentUser.username}
+                                            fill
+                                            className="rounded-full border border-gray-200 dark:border-gray-800 object-cover"
+                                            unoptimized
+                                        />
+                                    ) : (
+                                        <CircleUser className="h-6 w-6" />
+                                    )}
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent className="w-56" align="end" forceMount>
+                                <DropdownMenuLabel className="font-normal">
+                                    <div className="flex flex-col space-y-1">
+                                        <p className="text-sm font-medium leading-none">{currentUser.name || currentUser.username}</p>
+                                        <p className="text-xs leading-none text-muted-foreground">
+                                            @{currentUser.username}
+                                        </p>
+                                    </div>
+                                </DropdownMenuLabel>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem asChild>
+                                    <Link href={`/user/${currentUser.username}`} className="cursor-pointer">
+                                        <User className="mr-2 h-4 w-4" />
+                                        <span>Profile</span>
+                                    </Link>
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={handleLogout} className="cursor-pointer text-red-600 focus:text-red-600">
+                                    <LogOut className="mr-2 h-4 w-4" />
+                                    <span>Log out</span>
+                                </DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                    ) : (
+                        <Link
+                            href="/login"
+                            className={cn(buttonVariants({ variant: 'ghost', size: 'sm' }), 'h-8 px-3 flex items-center justify-center')}
+                            aria-label="Login"
+                        >
+                            <span className="text-sm font-medium">Login</span>
+                        </Link>
+                    )}
+
+                    <Separator orientation="vertical" className="hidden md:flex data-[orientation=vertical]:h-5" />
+
+                    <ModeSwitcher />
+                </div>
             </div>
         </header>
     )

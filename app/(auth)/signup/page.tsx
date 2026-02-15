@@ -6,6 +6,10 @@ import { Check, X, Eye, EyeOff, Loader2, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import { useTheme } from 'next-themes';
 import Image from 'next/image';
+import { signupUser } from '@/actions/auth-user';
+import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
+import { getUserProfile } from '@/actions/get-user-profile';
 
 const featureShowcase = [
     {
@@ -17,16 +21,17 @@ const featureShowcase = [
         image: '/hero-image-dark.png'
     },
     {
-        caption: 'Analyze contest performance',
-        image: '/hero-image-light.png'
+        caption: 'All Contest questions',
+        image: '/contest-page.png'
     },
     {
-        caption: 'Identify strengths & weaknesses',
-        image: '/auth-compare-image.png'
+        caption: 'Stay consistent with weekly goals',
+        image: '/weekly-goals.png'
     },
 ];
 
 export default function SignUpPage() {
+    const router = useRouter();
     const [username, setUsername] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -51,19 +56,33 @@ export default function SignUpPage() {
         return () => clearInterval(interval);
     }, []);
 
-    // Simulate username validation
+    // Real username validation
     useEffect(() => {
+        let active = true;
+
         if (username.length > 0) {
             setIsValidatingUsername(true);
             setUsernameValid(null);
 
-            const timer = setTimeout(() => {
-                setIsValidatingUsername(false);
-                // Simulate validation logic
-                setUsernameValid(username.length >= 3);
-            }, 1000);
+            const timer = setTimeout(async () => {
+                try {
+                    await getUserProfile(username);
+                    if (active) {
+                        setUsernameValid(true);
+                        setIsValidatingUsername(false);
+                    }
+                } catch (error) {
+                    if (active) {
+                        setUsernameValid(false);
+                        setIsValidatingUsername(false);
+                    }
+                }
+            }, 800);
 
-            return () => clearTimeout(timer);
+            return () => {
+                active = false;
+                clearTimeout(timer);
+            };
         } else {
             setUsernameValid(null);
             setIsValidatingUsername(false);
@@ -84,16 +103,21 @@ export default function SignUpPage() {
     // Form validation
     const isFormValid = usernameValid && email.includes('@') && password.length >= 8;
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!isFormValid) return;
 
         setIsSubmitting(true);
-        // Simulate API call
-        setTimeout(() => {
+
+        try {
+            await signupUser({ username, email, password });
+            toast.success('Account created successfully! Please login.');
+            router.push('/login');
+        } catch (error) {
+            toast.error('Failed to create account. Please try again.');
+        } finally {
             setIsSubmitting(false);
-            console.log('Form submitted:', { username, email, password });
-        }, 2000);
+        }
     };
 
     if (!mounted) {
@@ -182,7 +206,6 @@ export default function SignUpPage() {
                                         onChange={(e) => setEmail(e.target.value)}
                                         placeholder="email"
                                         className="w-full bg-white/10 dark:bg-black/20 backdrop-blur-md border border-white/20 dark:border-white/10 rounded-lg px-4 py-3 text-white placeholder:text-white/50 focus:outline-none focus:border-white/50 focus:bg-white/20 transition-all"
-                                        required
                                     />
                                 </div>
 

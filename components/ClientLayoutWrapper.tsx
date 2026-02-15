@@ -2,6 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 
@@ -24,7 +25,10 @@ export default function ClientLayoutWrapper({
             disableTransitionOnChange
         >
             {!isAuthPage && <Navbar />}
-            {children}
+            <div className="flex items-center justify-center min-h-[calc(100vh-14rem)] flex-col">
+                <main className="flex-1 w-full">{children}</main>
+            </div>
+            {!isAuthPage && <Footer />}
             <Toaster />
         </ThemeProvider>
     );

@@ -35,38 +35,66 @@ export function getCookie(name: string): string | null {
 }
 
 /**
+ * Set a cookie with a given name, value, and expiration days
+ * @param name - Cookie name
+ * @param value - Cookie value
+ * @param days - Expiration days
+ */
+export function setCookie(name: string, value: string, days: number): void {
+    if (typeof document === 'undefined') {
+        return;
+    }
+
+    let expires = '';
+    if (days) {
+        const date = new Date();
+        date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+        expires = '; expires=' + date.toUTCString();
+    }
+    document.cookie = name + '=' + (value || '') + expires + '; path=/';
+}
+
+/**
+ * Remove a cookie by name
+ * @param name - Cookie name
+ */
+export function removeCookie(name: string): void {
+    if (typeof document === 'undefined') {
+        return;
+    }
+    document.cookie = name + '=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+}
+
+/**
  * Get user information from authentication cookie
  * @returns AuthUser object or null if not logged in
  */
 export function getUserFromCookie(): AuthUser | null {
-    // TODO: Implement actual cookie reading logic
-    // For now, return a mock logged-in user for development
-    return {
-        username: 'rrrautela'
-    };
-
-    /* Original implementation - uncomment when ready to use cookies
     const cookieValue = getCookie('leetcode_user');
-    
+
     if (!cookieValue) {
         return null;
     }
 
+    // Since we are currently just storing the username as a plain string in some contexts,
+    // we should handle both JSON and plain string formats for backward compatibility 
+    // or simplicity if the goal is just to store the username.
+    // Based on the requirement "save that username to cookies", we'll assume it might be a simple string.
+
     try {
-        // Try to parse as JSON
+        // Try to parse as JSON first
         const user = JSON.parse(decodeURIComponent(cookieValue));
-        
-        // Validate that at least username exists
         if (user && user.username) {
             return user as AuthUser;
         }
-        
-        return null;
-    } catch (error) {
-        // If JSON parsing fails, assume the cookie value is just the username
-        return {
-            username: cookieValue
-        };
+    } catch (e) {
+        // If parsing fails, treat it as a plain username string
+        if (cookieValue) {
+            return {
+                username: cookieValue
+            };
+        }
     }
-    */
+
+    return null;
 }

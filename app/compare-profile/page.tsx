@@ -110,7 +110,7 @@ function CompareProfileContent() {
                 // Merged Stats
                 contestRating: contestData.contestRating || 0,
                 contestTopPercentage: contestData.contestTopPercentage,
-                totalSolved: statsData.totalSolved,
+                totalSolved: statsData.totalSolved || 0,
                 streak: calendarAggregated.streak,
                 activeDays: calendarAggregated.totalActiveDays,
                 activeYears: calendarAggregated.activeYears,
@@ -118,30 +118,30 @@ function CompareProfileContent() {
                 level: (contestData.contestBadges?.name as "Knight" | "Guardian" | "None") || defaultProfile.level,
 
                 solvedStats: {
-                    easy: statsData.easySolved,
-                    medium: statsData.mediumSolved,
-                    hard: statsData.hardSolved,
-                    totalEasy: statsData.totalEasy,
-                    totalMedium: statsData.totalMedium,
-                    totalHard: statsData.totalHard,
+                    easy: statsData.easySolved || 0,
+                    medium: statsData.mediumSolved || 0,
+                    hard: statsData.hardSolved || 0,
+                    totalEasy: statsData.totalEasy || 0,
+                    totalMedium: statsData.totalMedium || 0,
+                    totalHard: statsData.totalHard || 0,
                     beats: defaultProfile.solvedStats.beats,
                 },
 
                 // Transform contestParticipation to contestHistory format
                 contestHistory: contestData.contestParticipation
-                    .filter(p => p.attended)
-                    .map(p => ({
+                    ?.filter(p => p.attended)
+                    ?.map(p => ({
                         date: new Date(p.contest.startTime * 1000).toISOString().split('T')[0],
                         rating: p.rating,
                         rank: p.ranking,
                         timestamp: p.contest.startTime
                     }))
-                    .sort((a, b) => a.timestamp - b.timestamp),
+                    ?.sort((a, b) => a.timestamp - b.timestamp) || [],
 
-                languages: languageData.languageProblemCount.map(l => ({
+                languages: languageData.languageProblemCount?.map(l => ({
                     name: l.languageName,
                     solved: l.problemsSolved
-                })),
+                })) || [],
                 badges: defaultProfile.badges,
                 strengths: defaultProfile.strengths,
                 badgesData: badgesData

@@ -1,6 +1,7 @@
-
 'use client';
 
+import { useState, useEffect } from 'react';
+import { compareUsers, ComparisonResponse } from '@/actions/compare-users';
 import { DetailedUserProfile } from '@/lib/mock-data';
 import { motion } from 'framer-motion';
 import { Sparkles, Share2, Download, Copy, Twitter, Linkedin } from 'lucide-react';
@@ -20,75 +21,60 @@ interface VerdictCardProps {
 }
 
 export default function VerdictCard({ userA, userB }: VerdictCardProps) {
-    // Detailed Analysis Logic
-    const getVerdictAnalysis = (winner: DetailedUserProfile, loser: DetailedUserProfile) => {
-        const winningPoints: string[] = [];
-        const improvementPoints: string[] = []; // Renamed for positive framing
+    const [comparisonResult, setComparisonResult] = useState<ComparisonResponse | null>(null);
+    const [loading, setLoading] = useState(true);
 
-        // --- Winning Factors (Keep existing logic mostly, maybe refine) ---
-        // 1. Contest Rating
-        if (winner.contestRating > loser.contestRating) {
-            const diff = Math.round(winner.contestRating - loser.contestRating);
-            winningPoints.push(`Dominant rating lead (+${diff} points)`);
+    useEffect(() => {
+        const fetchComparison = async () => {
+            setLoading(true);
+            try {
+                // Construct textual data description for AI
+                const user1Data = `
+                    Username: ${userA.username}
+                    Contest Rating: ${userA.contestRating}
+                    Global Rank: ${userA.ranking}
+                    Total Solved: ${userA.totalSolved} (Easy: ${userA.solvedStats.easy}, Medium: ${userA.solvedStats.medium}, Hard: ${userA.solvedStats.hard})
+                    Streak: ${userA.streak} days
+                    Badges: ${userA.badgesData?.badgesCount || 0}
+                 `;
+                const user2Data = `
+                    Username: ${userB.username}
+                    Contest Rating: ${userB.contestRating}
+                    Global Rank: ${userB.ranking}
+                    Total Solved: ${userB.totalSolved} (Easy: ${userB.solvedStats.easy}, Medium: ${userB.solvedStats.medium}, Hard: ${userB.solvedStats.hard})
+                    Streak: ${userB.streak} days
+                    Badges: ${userB.badgesData?.badgesCount || 0}
+                 `;
+
+                const result = await compareUsers({
+                    user1_name: userA.username,
+                    user2_name: userB.username,
+                    user1_data: user1Data.trim(),
+                    user2_data: user2Data.trim()
+                });
+                setComparisonResult(result);
+            } catch (error) {
+                console.error("Failed to fetch comparison:", error);
+                toast.error("Failed to load detailed verdict.");
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        if (userA && userB) {
+            fetchComparison();
         }
-        // 2. Hard Problems
-        if (winner.solvedStats.hard > loser.solvedStats.hard) {
-            winningPoints.push(`Superior grasp of Hard problems (${winner.solvedStats.hard} solved)`);
-        }
-        // 3. Consistency
-        if (winner.streak > loser.streak + 5) {
-            winningPoints.push(`Higher consistency with ${winner.streak} day streak`);
-        }
-        // 4. Badges
-        if ((winner.badgesData?.badgesCount || 0) > (loser.badgesData?.badgesCount || 0)) {
-            winningPoints.push(`More achievements unlocked (${winner.badgesData?.badgesCount} badges)`);
-        }
-        // Fallback
-        if (winningPoints.length === 0) winningPoints.push("Better overall performance metrics");
+    }, [userA, userB]);
 
+    const localWinner = userA.contestRating >= userB.contestRating ? userA : userB;
+    const isA = localWinner.username === userA.username;
 
-        // --- Strategies for Growth (Ensure 3+ points) ---
+    const winnerName = comparisonResult ? comparisonResult.winner : localWinner.username;
 
-        // Point 1: Contest Strategy
-        if (loser.contestRating < 1500) {
-            improvementPoints.push("Focus on solving the first 2 contest problems consistently to reach 1500+.");
-        } else if (Math.abs(winner.contestRating - loser.contestRating) > 200) {
-            improvementPoints.push("Analyze 'Wrong Answer' submissions from recent contests to identify edge cases.");
-        } else {
-            improvementPoints.push("Prioritize speed on Medium problems to gain a rank advantage.");
-        }
+    const loserName = comparisonResult
+        ? (comparisonResult.winner === userA.username ? userB.username : userA.username)
+        : (localWinner.username === userA.username ? userB.username : userA.username);
 
-        // Point 2: Problem Solving Focus
-        const hardRatio = loser.solvedStats.hard / (loser.totalSolved || 1);
-        if (loser.solvedStats.hard < 10) {
-            improvementPoints.push("Start tackling high-acceptance 'Hard' problems to break the difficulty ceiling.");
-        } else if (hardRatio < 0.1) {
-            improvementPoints.push("Increase 'Hard' problem practice to improve pattern recognition.");
-        } else {
-            improvementPoints.push("Revisit solved problems and attempt to optimize space complexity.");
-        }
-
-        // Point 3: Topics / Habits
-        if (loser.streak < 7) {
-            improvementPoints.push("Build a 7-day streak using the 'Daily Challenge' to improve muscle memory.");
-        } else {
-            improvementPoints.push("Try 'Virtual Contests' on weekends to simulate time pressure.");
-        }
-
-        // Point 4: Specific Topic (Generic for now as we lack granular topic stats in this view, but detailed usage suggests it)
-        // We can rotate advice or check basic stats
-        if (loser.solvedStats.medium < loser.solvedStats.easy) {
-            improvementPoints.push("Shift focus from Easy to Medium problems (Graphs, DP) for faster growth.");
-        }
-
-        return { winningPoints, improvementPoints: improvementPoints.slice(0, 4) }; // Return up to 4
-    };
-
-    const winner = userA.contestRating >= userB.contestRating ? userA : userB;
-    const loser = userA.contestRating >= userB.contestRating ? userB : userA;
-    const isA = winner.username === userA.username;
-
-    const { winningPoints, improvementPoints } = getVerdictAnalysis(winner, loser);
 
     const handleShare = async (platform: 'twitter' | 'linkedin' | 'copy') => {
         const currentUrl = window.location.href;
@@ -118,7 +104,7 @@ export default function VerdictCard({ userA, userB }: VerdictCardProps) {
                                 Detailed Verdict
                             </h2>
                             <span className={`px-3 py-1 text-xs rounded-full uppercase tracking-wider font-mono font-bold ${isA ? 'bg-cyan-500/10 text-cyan-500' : 'bg-red-500/10 text-red-500'}`}>
-                                Winner: {winner.username}
+                                Winner: {winnerName}
                             </span>
                         </div>
 
@@ -130,27 +116,45 @@ export default function VerdictCard({ userA, userB }: VerdictCardProps) {
                                     Winning Factors
                                 </h3>
                                 <ul className="space-y-2">
-                                    {winningPoints.map((point, i) => (
-                                        <li key={i} className="text-sm text-muted-foreground flex items-start gap-2">
-                                            <span className="text-green-500 mt-1">✓</span>
-                                            {point}
-                                        </li>
-                                    ))}
+                                    {comparisonResult ? (
+                                        comparisonResult.winner_points.map((point, i) => (
+                                            <li key={i} className="text-sm text-muted-foreground flex items-start gap-2">
+                                                <span className="text-green-500 mt-1">✓</span>
+                                                {point}
+                                            </li>
+                                        ))
+                                    ) : (
+                                        Array.from({ length: 4 }).map((_, i) => (
+                                            <li key={i} className="flex items-center gap-2">
+                                                <div className="h-4 w-4 rounded-full bg-secondary animate-pulse" />
+                                                <div className="h-4 bg-secondary rounded w-full animate-pulse" />
+                                            </li>
+                                        ))
+                                    )}
                                 </ul>
                             </div>
 
                             {/* Strategies for Growth (Loser) */}
                             <div className="space-y-3 bg-secondary/5 rounded-xl p-4 border border-border/50">
                                 <h3 className="text-sm font-medium text-foreground uppercase tracking-wide flex items-center gap-2">
-                                    <span className="text-muted-foreground">Strategies for {loser.username}</span>
+                                    <span className="text-muted-foreground">Strategies for {loserName}</span>
                                 </h3>
                                 <ul className="space-y-2">
-                                    {improvementPoints.map((point, i) => (
-                                        <li key={i} className="text-sm text-muted-foreground flex items-start gap-2">
-                                            <span className="text-blue-500 mt-1">↗</span>
-                                            {point}
-                                        </li>
-                                    ))}
+                                    {comparisonResult ? (
+                                        comparisonResult.loser_points.map((point, i) => (
+                                            <li key={i} className="text-sm text-muted-foreground flex items-start gap-2">
+                                                <span className="text-blue-500 mt-1">↗</span>
+                                                {point}
+                                            </li>
+                                        ))
+                                    ) : (
+                                        Array.from({ length: 4 }).map((_, i) => (
+                                            <li key={i} className="flex items-center gap-2">
+                                                <div className="h-4 w-4 rounded-full bg-secondary animate-pulse" />
+                                                <div className="h-4 bg-secondary rounded w-full animate-pulse" />
+                                            </li>
+                                        ))
+                                    )}
                                 </ul>
                             </div>
                         </div>
@@ -160,9 +164,11 @@ export default function VerdictCard({ userA, userB }: VerdictCardProps) {
                     <div className="flex flex-col justify-between space-y-6 md:border-l md:border-border/50 md:pl-8">
                         <div>
                             <p className="text-muted-foreground text-sm leading-relaxed">
-                                <span className={`font-medium ${isA ? 'text-cyan-500' : 'text-red-500'}`}>{winner.username}</span> leads with a stronger contest rating and problem-solving depth.
+                                <span className={`font-medium ${isA ? 'text-cyan-500' : 'text-red-500'}`}>{winnerName}</span> leads with a stronger profile.
                                 <span className="block mt-2">
-                                    For <span className="text-foreground">{loser.username}</span>, focusing on <span className="text-foreground font-medium">Hard problems</span> & <span className="text-foreground font-medium">Contest Strategy</span> is key to closing the gap.
+                                    {comparisonResult
+                                        ? "AI Analysis completed based on recent performance metrics."
+                                        : "Generating AI-powered analysis of strengths and weaknesses..."}
                                 </span>
                             </p>
                         </div>

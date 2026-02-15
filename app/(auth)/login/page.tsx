@@ -6,6 +6,10 @@ import { Eye, EyeOff, Loader2, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import { useTheme } from 'next-themes';
 import Image from 'next/image';
+import { loginUser } from '@/actions/auth-user';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { toast } from 'sonner';
+import { setCookie, getUserFromCookie } from '@/lib/cookie-utils';
 
 const featureShowcase = [
     {
@@ -17,16 +21,18 @@ const featureShowcase = [
         image: '/hero-image-dark.png'
     },
     {
-        caption: 'Analyze contest performance',
-        image: '/hero-image-light.png'
+        caption: 'All Contest Questions',
+        image: '/contest-page.png'
     },
     {
-        caption: 'Identify strengths & weaknesses',
-        image: '/auth-compare-image.png'
+        caption: 'Stay consistent with weekly goals',
+        image: '/weekly-goals.png'
     },
 ];
 
 export default function LoginPage() {
+    const router = useRouter();
+    const searchParams = useSearchParams();
     const [identifier, setIdentifier] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
@@ -37,7 +43,17 @@ export default function LoginPage() {
 
     useEffect(() => {
         setMounted(true);
-    }, []);
+        const user = getUserFromCookie();
+        if (user && user.username) {
+            router.push(`/user/${user.username}`);
+        }
+
+        // Check for username in query params
+        const usernameParam = searchParams.get('username');
+        if (usernameParam) {
+            setIdentifier(usernameParam);
+        }
+    }, [router, searchParams]);
 
     // Auto-change images every 4 seconds
     useEffect(() => {
@@ -50,16 +66,48 @@ export default function LoginPage() {
 
     const isFormValid = identifier.length > 0 && password.length > 0;
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!isFormValid) return;
 
         setIsSubmitting(true);
-        // Simulate API call
-        setTimeout(() => {
+
+        try {
+            const data = await loginUser({ identifier, password });
+
+            if (data.token) {
+                // Decode JWT to get username
+                try {
+                    const base64Url = data.token.split('.')[1];
+                    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+                    const jsonPayload = decodeURIComponent(atob(base64).split('').map(function (c) {
+                        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+                    }).join(''));
+
+                    const payload = JSON.parse(jsonPayload);
+                    const username = payload.username;
+
+                    if (username) {
+                        // Save username to cookie for 7 days
+                        setCookie('leetcode_user', username, 7);
+                        toast.success(`Welcome back, ${username}!`);
+                        router.push(`/user/${username}`);
+                    } else {
+                        toast.error('Could not retrieve username from token.');
+                    }
+                } catch (decodeError) {
+                    console.error('Token decoding failed:', decodeError);
+                    toast.error('Failed to process login token.');
+                }
+            } else {
+                toast.error('Login successful but no token received.');
+            }
+        } catch (error) {
+            console.error('Login error:', error);
+            toast.error('Invalid credentials. Please try again.');
+        } finally {
             setIsSubmitting(false);
-            console.log('Login submitted:', { identifier, password });
-        }, 2000);
+        }
     };
 
     if (!mounted) {

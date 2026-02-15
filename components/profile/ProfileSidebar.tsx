@@ -8,7 +8,15 @@ import { Edit, GitCompare, Share2, Github, Twitter, Linkedin, Globe, CheckCircle
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
+import { toast } from 'sonner';
 import type { Badge as BadgeType } from '@/actions/get-user-badges';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface ProfileSidebarProps {
     user: DetailedUserProfile;
@@ -312,14 +320,60 @@ export default function ProfileSidebar({ user, score }: ProfileSidebarProps) {
 
             {/* Action Buttons */}
             <div className="flex gap-2">
-                <Button variant="outline" className="w-full cursor-pointer" size="sm">
-                    <GitCompare className="w-4 h-4 mr-2" />
-                    Compare
-                </Button>
-                <Button variant="outline" className="w-full cursor-pointer" size="sm">
-                    <Share2 className="w-4 h-4 mr-2" />
-                    Share
-                </Button>
+                <Link href={`/compare-profile?u1=${user.username}`} className="w-full">
+                    <Button variant="outline" className="w-full cursor-pointer" size="sm">
+                        <GitCompare className="w-4 h-4 mr-2" />
+                        Compare
+                    </Button>
+                </Link>
+
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button variant="outline" className="w-full cursor-pointer" size="sm">
+                            <Share2 className="w-4 h-4 mr-2" />
+                            Share
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-48">
+                        <DropdownMenuItem
+                            onClick={() => {
+                                if (typeof window !== 'undefined') {
+                                    navigator.clipboard.writeText(window.location.href);
+                                    toast.success("Profile link copied to clipboard!");
+                                }
+                            }}
+                            className="cursor-pointer"
+                        >
+                            <Share2 className="w-4 h-4 mr-2" />
+                            Copy Link
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                            onClick={() => {
+                                if (typeof window !== 'undefined') {
+                                    const url = encodeURIComponent(window.location.href);
+                                    const text = encodeURIComponent(`Check out this LeetCode profile!`);
+                                    window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`, '_blank');
+                                }
+                            }}
+                            className="cursor-pointer"
+                        >
+                            <Twitter className="w-4 h-4 mr-2 text-[#1DA1F2]" />
+                            Share to X
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                            onClick={() => {
+                                if (typeof window !== 'undefined') {
+                                    const url = encodeURIComponent(window.location.href);
+                                    window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${url}`, '_blank');
+                                }
+                            }}
+                            className="cursor-pointer"
+                        >
+                            <Linkedin className="w-4 h-4 mr-2 text-[#0A66C2]" />
+                            Share to LinkedIn
+                        </DropdownMenuItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>
             </div>
 
             <div className="flex justify-center -mt-2">

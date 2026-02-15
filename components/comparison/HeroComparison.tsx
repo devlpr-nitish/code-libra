@@ -189,16 +189,16 @@ export default function HeroComparison({ userA, userB, onUserUpdate, loadingA, l
     return (
         <div id="comparison-capture-area" className="w-full pt-8 pb-12 relative overflow-hidden">
             {/* Share Button - Absolute Top Right */}
-            <div className="absolute top-4 right-4 z-50">
+            <div className="absolute top-2 right-2 md:top-4 md:right-4 z-50">
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                         <motion.button
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.95 }}
-                            className="px-4 py-2 flex items-center justify-center gap-2 rounded-md cursor-pointer bg-secondary/20 hover:bg-secondary/40 border border-white/10 backdrop-blur-md transition-colors text-muted-foreground hover:text-foreground"
+                            className="p-2 md:px-4 md:py-2 flex items-center justify-center gap-2 rounded-md cursor-pointer bg-secondary/20 hover:bg-secondary/40 border border-white/10 backdrop-blur-md transition-colors text-muted-foreground hover:text-foreground"
                         >
                             <Share2 className="w-4 h-4 cursor-pointer" />
-                            <span>share</span>
+                            <span className="hidden md:inline">share</span>
                         </motion.button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="w-48 backdrop-blur-xl bg-black/80 border-white/10">
@@ -262,7 +262,7 @@ export default function HeroComparison({ userA, userB, onUserUpdate, loadingA, l
 
                             {/* Active Badge A */}
                             {activeBadgeA?.icon && (
-                                <div className="absolute -bottom-2 -right-2 z-20 rounded-full p-1.5" title={activeBadgeA.displayName}>
+                                <div className="absolute -bottom-2 -right-2 z-20 rounded-full p-1.5 text-[0px]" title={activeBadgeA.displayName}>
                                     <div className="w-6 h-6 md:w-8 md:h-8 relative">
                                         <Image
                                             src={getIconUrl(activeBadgeA.icon)}
@@ -354,7 +354,7 @@ export default function HeroComparison({ userA, userB, onUserUpdate, loadingA, l
 
                             {/* Active Badge B */}
                             {activeBadgeB?.icon && (
-                                <div className="absolute -bottom-2 -left-2 z-20 rounded-full p-1.5" title={activeBadgeB.displayName}>
+                                <div className="absolute -bottom-2 -left-2 z-20 rounded-full p-1.5 text-[0px]" title={activeBadgeB.displayName}>
                                     <div className="w-6 h-6 md:w-8 md:h-8 relative">
                                         <Image
                                             src={getIconUrl(activeBadgeB.icon)}

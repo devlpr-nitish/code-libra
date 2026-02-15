@@ -191,133 +191,139 @@ export default function ContestQuestionsTable({ questions }: ContestQuestionsTab
     return (
         <div className="space-y-4">
             {/* Compact Single-Row Filter Layout */}
-            <div className="flex flex-wrap gap-3 items-center">
+            <div className="flex flex-col md:flex-row gap-3 items-stretch md:items-center">
                 {/* Search Bar - Reduced Width */}
-                <div className="relative flex-1 min-w-[200px] max-w-[400px]">
+                <div className="relative flex-1 w-full md:min-w-[200px] md:max-w-[400px]">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input
                         type="text"
                         placeholder="Search questions..."
                         value={searchInput}
                         onChange={(e) => setSearchInput(e.target.value)}
-                        className="pl-10 bg-secondary/50 border-border h-9"
+                        className="pl-10 bg-secondary/50 border-border h-9 w-full"
                     />
                 </div>
 
-                {/* Problem Index Multi-Select Dropdown */}
-                <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
-                    <PopoverTrigger asChild>
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            className="h-9 min-w-[140px] justify-between"
-                        >
-                            <div className="flex items-center gap-2">
-                                <Filter className="h-4 w-4" />
-                                <span>
-                                    {selectedProblemIndices.length === 0
-                                        ? 'Problem #'
-                                        : selectedProblemIndices.length === 1
-                                            ? selectedProblemIndices[0]
-                                            : `${selectedProblemIndices.length} selected`}
-                                </span>
-                            </div>
-                            {selectedProblemIndices.length > 0 && (
-                                <X
-                                    className="h-3 w-3 ml-2 opacity-50 hover:opacity-100"
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        setSelectedProblemIndices([]);
-                                        setCurrentPage(1);
-                                    }}
-                                />
-                            )}
-                        </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-[200px] p-2" align="start">
-                        <div className="space-y-1">
-                            {PROBLEM_INDICES.map((index) => (
-                                <label
-                                    key={index}
-                                    className="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-secondary cursor-pointer"
-                                >
-                                    <input
-                                        type="checkbox"
-                                        checked={selectedProblemIndices.includes(index)}
-                                        onChange={() => toggleProblemIndex(index)}
-                                        className="h-4 w-4 rounded border-border"
-                                    />
-                                    <span className="text-sm">{index}</span>
-                                </label>
-                            ))}
-                        </div>
-                    </PopoverContent>
-                </Popover>
-
-                {/* Rating Range - Compact */}
-                <div className="flex items-center gap-2">
-                    <Input
-                        type="number"
-                        placeholder="Min"
-                        value={minRating}
-                        min="0"
-                        onChange={(e) => {
-                            const value = e.target.value;
-                            if (value === '' || parseFloat(value) >= 0) {
-                                setMinRating(value);
-                                setCurrentPage(1);
-                            }
-                        }}
-                        className="bg-secondary/50 border-border h-9 w-[90px] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                    />
-                    <span className="text-muted-foreground text-sm">-</span>
-                    <Input
-                        type="number"
-                        placeholder="Max"
-                        value={maxRating}
-                        min="0"
-                        onChange={(e) => {
-                            const value = e.target.value;
-                            if (value === '' || parseFloat(value) >= 0) {
-                                setMaxRating(value);
-                                setCurrentPage(1);
-                            }
-                        }}
-                        className="bg-secondary/50 border-border h-9 w-[90px] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                    />
-                </div>
-
-                {/* Random Question Button */}
-                <TooltipProvider>
-                    <Tooltip>
-                        <TooltipTrigger asChild>
+                {/* Filters Row for Mobile / Inline for Desktop */}
+                <div className="flex flex-col md:flex-row gap-2 w-full md:w-auto">
+                    {/* Problem Index Multi-Select Dropdown - Full Width on Mobile */}
+                    <Popover open={isPopoverOpen} onOpenChange={setIsPopoverOpen}>
+                        <PopoverTrigger asChild>
                             <Button
                                 variant="outline"
                                 size="sm"
-                                onClick={handleRandomQuestion}
-                                className="h-9 cursor-pointer"
-                                disabled={filteredAndSortedQuestions.length === 0}
+                                className="h-9 w-full md:w-auto md:min-w-[140px] justify-between"
                             >
-                                <Shuffle className="h-4 w-4" />
+                                <div className="flex items-center gap-2 truncate">
+                                    <Filter className="h-4 w-4 shrink-0" />
+                                    <span className="truncate">
+                                        {selectedProblemIndices.length === 0
+                                            ? 'Problem #'
+                                            : selectedProblemIndices.length === 1
+                                                ? selectedProblemIndices[0]
+                                                : `${selectedProblemIndices.length} selected`}
+                                    </span>
+                                </div>
+                                {selectedProblemIndices.length > 0 && (
+                                    <X
+                                        className="h-3 w-3 ml-2 opacity-50 hover:opacity-100 shrink-0"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            setSelectedProblemIndices([]);
+                                            setCurrentPage(1);
+                                        }}
+                                    />
+                                )}
                             </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                            <p>Random Question</p>
-                        </TooltipContent>
-                    </Tooltip>
-                </TooltipProvider>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-[200px] p-2" align="start">
+                            <div className="space-y-1">
+                                {PROBLEM_INDICES.map((index) => (
+                                    <label
+                                        key={index}
+                                        className="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-secondary cursor-pointer"
+                                    >
+                                        <input
+                                            type="checkbox"
+                                            checked={selectedProblemIndices.includes(index)}
+                                            onChange={() => toggleProblemIndex(index)}
+                                            className="h-4 w-4 rounded border-border"
+                                        />
+                                        <span className="text-sm">{index}</span>
+                                    </label>
+                                ))}
+                            </div>
+                        </PopoverContent>
+                    </Popover>
 
-                {/* Clear Filters Button */}
-                {hasActiveFilters && (
-                    <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={clearFilters}
-                        className="h-9 text-muted-foreground hover:text-foreground"
-                    >
-                        Clear
-                    </Button>
-                )}
+                    {/* Filter Actions Row (Min/Max + Buttons) */}
+                    <div className="flex gap-2 w-full md:w-auto">
+                        {/* Rating Range - Flexible width */}
+                        <div className="flex items-center gap-2 flex-1 md:flex-none">
+                            <Input
+                                type="number"
+                                placeholder="Min"
+                                value={minRating}
+                                min="0"
+                                onChange={(e) => {
+                                    const value = e.target.value;
+                                    if (value === '' || parseFloat(value) >= 0) {
+                                        setMinRating(value);
+                                        setCurrentPage(1);
+                                    }
+                                }}
+                                className="bg-secondary/50 border-border h-9 w-full md:w-[80px] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                            />
+                            <span className="text-muted-foreground text-sm">-</span>
+                            <Input
+                                type="number"
+                                placeholder="Max"
+                                value={maxRating}
+                                min="0"
+                                onChange={(e) => {
+                                    const value = e.target.value;
+                                    if (value === '' || parseFloat(value) >= 0) {
+                                        setMaxRating(value);
+                                        setCurrentPage(1);
+                                    }
+                                }}
+                                className="bg-secondary/50 border-border h-9 w-full md:w-[80px] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                            />
+                        </div>
+
+                        {/* Random Question Button */}
+                        <TooltipProvider>
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={handleRandomQuestion}
+                                        className="h-9 px-3 cursor-pointer shrink-0"
+                                        disabled={filteredAndSortedQuestions.length === 0}
+                                    >
+                                        <Shuffle className="h-4 w-4" />
+                                    </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                    <p>Random Question</p>
+                                </TooltipContent>
+                            </Tooltip>
+                        </TooltipProvider>
+
+                        {/* Clear Filters Button */}
+                        {hasActiveFilters && (
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={clearFilters}
+                                className="h-9 px-3 text-muted-foreground hover:text-foreground shrink-0"
+                            >
+                                Clear
+                            </Button>
+                        )}
+                    </div>
+                </div>
             </div>
 
             {/* Results Count */}

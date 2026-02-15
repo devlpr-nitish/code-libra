@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
+import Link from 'next/link';
 import WeeklyCalendarHeader from '@/components/weekly-goals/WeeklyCalendarHeader';
 import DayColumn, { DailyTask, Contest } from '@/components/weekly-goals/DayColumn';
 import ProfileScoreTracker from '@/components/weekly-goals/ProfileScoreTracker';
@@ -256,81 +257,136 @@ const WeeklyGoalsPage = () => {
     }, [weekOffset]);
 
     return (
-        <div className="min-h-screen bg-background text-foreground px-6">
-            <div className="max-w-7xl mx-auto px-4 py-2">
-                {/* Page Header */}
-                <div className="mb-4">
-                    {/* <h1 className="text-2xl font-bold text-foreground">Weekly Goals</h1> */}
-                    <p className="text-md font-medium text-foreground mt-1">
-                        Personalized learning plan based on your profile
-                    </p>
-                </div>
+        <div className="relative min-h-screen bg-background text-foreground px-6">
+            {/* Disclaimer Overlay */}
+            <div className="fixed inset-0 z-50 flex items-center justify-center overflow-hidden">
+                <div className="bg-background/60 absolute inset-0 backdrop-blur-xl" />
 
-                {/* Calendar Header with Tabs */}
-                <WeeklyCalendarHeader
-                    currentView={currentView}
-                    onViewChange={setCurrentView}
-                    weekRange={weekRange}
-                    onWeekChange={handleWeekChange}
-                />
+                <motion.div
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.5 }}
+                    className="relative z-10 text-center px-4"
+                >
+                    <motion.div
+                        animate={{
+                            y: [0, -15, 0],
+                        }}
+                        transition={{
+                            duration: 2,
+                            repeat: Infinity,
+                            ease: "easeInOut"
+                        }}
+                        className="text-7xl mb-6 filter drop-shadow-lg"
+                    >
+                        🚀
+                    </motion.div>
 
-                {/* Main Layout */}
-                <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-4">
-                    {/* Left Sidebar - Stats */}
-                    <div className="space-y-3">
-                        <DifficultyLegend />
-                        <WeeklySummary weeklyStats={weeklyStats} />
+                    <h1 className="text-5xl md:text-7xl font-black mb-6 tracking-tighter">
+                        <span className="bg-clip-text text-transparent bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500">
+                            Coming Soon
+                        </span>
+                    </h1>
 
+                    <motion.p
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.2 }}
+                        className="text-xl md:text-2xl text-muted-foreground font-medium mb-8 max-w-lg mx-auto"
+                    >
+                        We are cooking something special for your Weekly Goals! 👨‍🍳✨
+                    </motion.p>
 
-                        <ProfileScoreTracker
-                            currentScore={450}
-                            potentialScoreToday={todayScore}
-                            scoreGainedYesterday={17}
-                            completedYesterday={true}
-                        />
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.6 }}
+                        className="mt-12"
+                    >
+                        <Link href="/" className="px-8 py-3 rounded-full bg-primary text-primary-foreground font-semibold hover:bg-primary/90 transition-colors shadow-lg hover:shadow-primary/20">
+                            Back to Home
+                        </Link>
+                    </motion.div>
+                </motion.div>
+            </div>
 
-                        <TopicsAnalysis
-                            weakTopics={['Dynamic Programming', 'Graphs', 'Tree Traversal']}
-                            strongTopics={['Arrays', 'Hash Tables', 'Binary Search']}
-                        />
+            {/* Blurred & Non-interactive Content */}
+            <div className="filter blur-md pointer-events-none select-none opacity-50 h-screen overflow-hidden">
+                <div className="max-w-7xl mx-auto px-4 py-2">
+                    {/* Page Header */}
+                    <div className="mb-4">
+                        {/* <h1 className="text-2xl font-bold text-foreground">Weekly Goals</h1> */}
+                        <p className="text-md font-medium text-foreground mt-1">
+                            Personalized learning plan based on your profile
+                        </p>
                     </div>
 
-                    {/* Right Panel - Calendar */}
-                    <div className="border border-border/50 overflow-hidden">
-                        {currentView === 'week' ? (
-                            <div key={weekOffset} className="grid grid-cols-7 h-[calc(100vh-280px)] min-h-[500px]">
-                                {days.map((day, index) => (
+                    {/* Calendar Header with Tabs */}
+                    <WeeklyCalendarHeader
+                        currentView={currentView}
+                        onViewChange={setCurrentView}
+                        weekRange={weekRange}
+                        onWeekChange={handleWeekChange}
+                    />
+
+                    {/* Main Layout */}
+                    <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-4">
+                        {/* Left Sidebar - Stats */}
+                        <div className="space-y-3">
+                            <DifficultyLegend />
+                            <WeeklySummary weeklyStats={weeklyStats} />
+
+
+                            <ProfileScoreTracker
+                                currentScore={450}
+                                potentialScoreToday={todayScore}
+                                scoreGainedYesterday={17}
+                                completedYesterday={true}
+                            />
+
+                            <TopicsAnalysis
+                                weakTopics={['Dynamic Programming', 'Graphs', 'Tree Traversal']}
+                                strongTopics={['Arrays', 'Hash Tables', 'Binary Search']}
+                            />
+                        </div>
+
+                        {/* Right Panel - Calendar */}
+                        <div className="border border-border/50 overflow-hidden">
+                            {currentView === 'week' ? (
+                                <div key={weekOffset} className="grid grid-cols-7 h-[calc(100vh-280px)] min-h-[500px]">
+                                    {days.map((day, index) => (
+                                        <DayColumn
+                                            key={day}
+                                            day={day.substring(0, 3).toUpperCase()}
+                                            date={dates[index]}
+                                            tasks={weeklyPlan[day] || []}
+                                            isWeekend={index === 0 || index === 6}
+                                            isToday={weekOffset === 0 && day === todayDayName}
+                                            onTaskToggle={handleTaskToggle}
+                                            contest={weekendContests[day]}
+                                            index={index}
+                                        />
+                                    ))}
+                                </div>
+                            ) : (
+                                // Day view - show only today
+                                <div className="grid grid-cols-1 h-[calc(100vh-280px)] min-h-[500px]">
                                     <DayColumn
-                                        key={day}
-                                        day={day.substring(0, 3).toUpperCase()}
-                                        date={dates[index]}
-                                        tasks={weeklyPlan[day] || []}
-                                        isWeekend={index === 0 || index === 6}
-                                        isToday={weekOffset === 0 && day === todayDayName}
+                                        day={todayDayName.substring(0, 3).toUpperCase()}
+                                        date={new Date().getDate().toString()}
+                                        tasks={weeklyPlan[todayDayName] || []}
+                                        isWeekend={todayDayName === 'Saturday' || todayDayName === 'Sunday'}
+                                        isToday={true}
                                         onTaskToggle={handleTaskToggle}
-                                        contest={weekendContests[day]}
-                                        index={index}
+                                        contest={weekendContests[todayDayName]}
                                     />
-                                ))}
-                            </div>
-                        ) : (
-                            // Day view - show only today
-                            <div className="grid grid-cols-1 h-[calc(100vh-280px)] min-h-[500px]">
-                                <DayColumn
-                                    day={todayDayName.substring(0, 3).toUpperCase()}
-                                    date={new Date().getDate().toString()}
-                                    tasks={weeklyPlan[todayDayName] || []}
-                                    isWeekend={todayDayName === 'Saturday' || todayDayName === 'Sunday'}
-                                    isToday={true}
-                                    onTaskToggle={handleTaskToggle}
-                                    contest={weekendContests[todayDayName]}
-                                />
-                            </div>
-                        )}
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </div>
             </div>
-        </div >
+        </div>
     );
 };
 

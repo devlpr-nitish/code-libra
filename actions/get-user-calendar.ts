@@ -41,18 +41,19 @@ export const getUserTotalActiveDays = async (username: string): Promise<{ totalA
         const initialData = await getUserCalendar(username, currentYear);
 
         // 2. Fetch all other active years in parallel
-        const otherYears = initialData.activeYears.filter(y => y !== currentYear);
+        const otherYears = initialData?.activeYears?.filter(y => y !== currentYear) || [];
 
         const otherYearsData = await Promise.all(
             otherYears.map(year => getUserCalendar(username, year))
         );
 
         // 3. Sum totalActiveDays and merge submission calendars
-        let totalActiveDays = initialData.totalActiveDays;
+        let totalActiveDays = initialData?.totalActiveDays || 0;
         let mergedCalendar: Record<string, number> = {};
 
         // Helper to merge
         const merge = (calendarStr: string) => {
+            if (!calendarStr) return;
             try {
                 const cal = JSON.parse(calendarStr);
                 Object.assign(mergedCalendar, cal);
@@ -61,11 +62,11 @@ export const getUserTotalActiveDays = async (username: string): Promise<{ totalA
             }
         };
 
-        merge(initialData.submissionCalendar); // Current year
+        merge(initialData?.submissionCalendar); // Current year
 
         otherYearsData.forEach(data => {
-            totalActiveDays += data.totalActiveDays;
-            merge(data.submissionCalendar);
+            totalActiveDays += data?.totalActiveDays;
+            merge(data?.submissionCalendar);
         });
 
         return {
