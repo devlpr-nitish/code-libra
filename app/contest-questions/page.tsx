@@ -1,7 +1,15 @@
+import type { Metadata } from "next";
 import { Suspense } from 'react';
 import { getContestQuestions } from '@/actions/get-contest-questions';
 import ContestQuestionsTable from '@/components/ContestQuestionsTable';
 import { Skeleton } from '@/components/ui/skeleton';
+
+export const metadata: Metadata = {
+  title: "Contest Questions – CodeLibra",
+  description:
+    "Browse all LeetCode weekly and biweekly contest questions with difficulty ratings, topics, and direct problem links. Filter and search past contest problems in one place.",
+};
+
 
 function TableSkeleton() {
     return (
